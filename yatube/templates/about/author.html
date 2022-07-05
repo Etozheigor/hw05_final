@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Об авторе проекта{% endblock %}
+{% block content %}
+<h1>Привет, меня зовут Игорь</h1>
+<p> Если вы видите тут только картинку ёжика, значит я еще не нашел времени заполнить этот раздел.</p>
+<p>
+  <img src="{% static "img/ezhik.png" %}" width="700" height="400"
+  class="d-inline-block align-top" alt="">
+</p>
+{% endblock %}
