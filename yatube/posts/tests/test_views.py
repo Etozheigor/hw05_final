@@ -303,7 +303,6 @@ class CommentTests(TestCase):
 
 
 class CacheTests(TestCase):
-    @classmethod
     def setUp(self):
         self.guest_client = Client()
 
@@ -312,6 +311,7 @@ class CacheTests(TestCase):
         user = User.objects.create_user(username='TestUser')
         post = Post.objects.create(author=user,
                                    text='Тестовый текст')
+
         response_content = self.guest_client.get(
             reverse('posts:index')).content
         post.delete()
@@ -343,9 +343,10 @@ class FollowTest(TestCase):
         self.author.force_login(self.user_author)
 
     def test_authenticated_user_can_follow(self):
-        """Залогиненный пользователь может подписаться/отписаться от авторов,
-        при этом нельзя подписаться/отписаться, если он уже подписан/отписан"""
+        """Залогиненный пользователь может подписаться на  авторов,
+        при этом нельзя подписаться, если он уже подписан"""
         follow_count = Follow.objects.count()
+
         self.user.get(
             reverse(('posts:profile_follow'),
                     kwargs={'username': f'{self.user_author.username}'}))
@@ -354,7 +355,18 @@ class FollowTest(TestCase):
                     kwargs={'username': f'{self.user_author.username}'}))
 
         self.assertEqual(Follow.objects.count(), follow_count + 1)
+        self.assertTrue(
+            Follow.objects.filter(user=self.user_user,
+                                  author=self.user_author).exists())
 
+    def test_authenticated_user_can_unfollow(self):
+        """Залогиненный пользователь может отписаться от авторов,
+        при этом нельзя отписаться, если он уже отписан"""
+        follow_count = Follow.objects.count()
+
+        self.user.get(
+            reverse(('posts:profile_follow'),
+                    kwargs={'username': f'{self.user_author.username}'}))
         self.user.get(
             reverse(('posts:profile_unfollow'),
                     kwargs={'username': f'{self.user_author.username}'}))
@@ -363,10 +375,14 @@ class FollowTest(TestCase):
                     kwargs={'username': f'{self.user_author.username}'}))
 
         self.assertEqual(Follow.objects.count(), follow_count)
+        self.assertFalse(
+            Follow.objects.filter(user=self.user_user,
+                                  author=self.user_author).exists())
 
-    def test_authenticated_user_canе_follow_himself(self):
+    def test_authenticated_user_cant_follow_himself(self):
         """Залогиненный пользователь не может подписаться на самого себя"""
         follow_count = Follow.objects.count()
+
         self.user.get(
             reverse(('posts:profile_follow'),
                     kwargs={'username': f'{self.user_user.username}'}))
