@@ -164,18 +164,11 @@ class PostsTests(TestCase):
         nofollower_response = self.nofollower.get(
             reverse(('posts:profile'),
                     kwargs={'username': f'{self.follower_user.username}'}))
-        self_follower_response = self.follower.get(
-            reverse(('posts:profile'),
-                    kwargs={'username': f'{self.follower_user.username}'}))
         first_object = response.context['page_obj'][0]
 
         self.assertEqual(follower_response.context.get('following'),
                          True)
         self.assertEqual(nofollower_response.context.get('following'), False)
-        self.assertEqual(self_follower_response.context.get('is_self_author'),
-                         True)
-        self.assertEqual(nofollower_response.context.get('is_self_author'),
-                         False)
         self.assertEqual(first_object, self.post)
         self.assertEqual(response.context.get('author').username, 'HasNoName')
         self.assertEqual(response.context.get('author_posts_count'), 1)
@@ -320,9 +313,12 @@ class CacheTests(TestCase):
         cache.clear()
         response_content_cache_delete = self.guest_client.get(
             reverse('posts:index')).content
+        response = self.guest_client.get(
+            reverse('posts:index'))
 
         self.assertEqual(response_content, response_content_post_delete)
         self.assertNotEqual(response_content, response_content_cache_delete)
+        self.assertNotIn(post, response.context['page_obj'])
 
 
 class FollowTest(TestCase):
