@@ -109,6 +109,7 @@ class PostFormTests(TestCase):
         self.assertEqual(Post.objects.count(), posts_count)
         self.assertTrue(
             Post.objects.filter(
+                id=self.post.id,
                 text='Тестовый отредактированный текст',
             ).exists())
 

@@ -30,7 +30,8 @@ def profile(request, username):
     author_posts = author.posts.all()
     author_posts_count = author_posts.count()
     if request.user.is_authenticated is True:
-        following = Follow.objects.filter(user=request.user, author=author).exists()
+        following = Follow.objects.filter(
+            user=request.user, author=author).exists()
     else:
         following = False
     context = {'page_obj': paginator(request, author_posts,
@@ -100,8 +101,7 @@ def add_comment(request, post_id):
 
 @login_required
 def follow_index(request):
-    authors = Follow.objects.filter(user=request.user).values_list('author')
-    post_list = Post.objects.filter(author__in=authors)
+    post_list = Post.objects.filter(author__following__user=request.user)
     is_following = post_list.exists()
     context = {'page_obj': paginator(request, post_list,
                                      settings.POSTS_PER_PAGE),

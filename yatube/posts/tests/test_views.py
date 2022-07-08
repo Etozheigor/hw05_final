@@ -313,12 +313,11 @@ class CacheTests(TestCase):
         cache.clear()
         response_content_cache_delete = self.guest_client.get(
             reverse('posts:index')).content
-        response = self.guest_client.get(
-            reverse('posts:index'))
 
         self.assertEqual(response_content, response_content_post_delete)
         self.assertNotEqual(response_content, response_content_cache_delete)
-        self.assertNotIn(post, response.context['page_obj'])
+        self.assertNotIn(post.text.encode('utf-8'),
+                         response_content_cache_delete)
 
 
 class FollowTest(TestCase):
