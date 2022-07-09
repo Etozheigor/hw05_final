@@ -29,7 +29,7 @@ def profile(request, username):
     author = get_object_or_404(User, username=username)
     author_posts = author.posts.all()
     author_posts_count = author_posts.count()
-    if request.user.is_authenticated is True:
+    if request.user.is_authenticated:
         following = Follow.objects.filter(
             user=request.user, author=author).exists()
     else:
@@ -44,8 +44,9 @@ def profile(request, username):
 
 
 def post_detail(request, post_id):
-    post = get_object_or_404(Post, pk=post_id)
-    author = get_object_or_404(User, username=post.author)
+    # post = get_object_or_404(Post, pk=post_id).select_related('author')
+    post = Post.objects.select_related('author').get(pk=post_id)
+    author = post.author
     author_posts_count = author.posts.count()
     form = CommentForm(request.POST or None)
     comments = post.comments.all()
