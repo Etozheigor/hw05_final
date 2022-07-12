@@ -25,7 +25,9 @@ CSRF_FAILURE_VIEW = 'core.views.csrf_failure'
 ALLOWED_HOSTS = ['localhost',
                  '127.0.0.1',
                  '[::1]',
-                 'testserver', ]
+                 'testserver',
+                 'www.igorcodit.pythonanywhere.com',
+                 'igorcodit.pythonanywhere.com',]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
