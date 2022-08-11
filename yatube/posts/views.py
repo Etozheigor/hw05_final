@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_page
 
 from .forms import CommentForm, PostForm
-from .models import Follow, Group, Post, User
+from .models import Follow, Group, Post, User, Like
 from .utils import paginator
 
 
@@ -50,11 +50,22 @@ def post_detail(request, post_id):
     author_posts_count = author.posts.count()
     form = CommentForm(request.POST or None)
     comments = post.comments.all()
+    if request.user.is_authenticated:
+        is_liked = Like.objects.filter(
+            user=request.user, post=post).exists()
+    else:
+        is_liked = False
+    post_likes_count = Like.objects.filter(post=post).count()
     context = {'post': post, 'author_posts_count': author_posts_count,
-               'form': form, 'comments': comments}
+               'form': form, 'comments': comments, 'is_liked': is_liked, 
+               'post_likes_count': post_likes_count}
     if request.user == post.author:
-        context = {'post': post, 'author_posts_count': author_posts_count,
-                   'form': form, 'comments': comments, 'is_edit': True}
+        context = {'post': post,
+                   'author_posts_count': author_posts_count,
+                   'form': form, 'comments': comments,
+                   'is_liked': is_liked,
+                   'post_likes_count': post_likes_count,
+                   'is_edit': True}
     return render(request, 'posts/post_detail.html', context)
 
 
@@ -129,3 +140,18 @@ def profile_unfollow(request, username):
         if user_follow_author.exists():
             user_follow_author.delete()
     return redirect('posts:profile', username=username)
+
+
+@login_required
+def post_like(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    Like.objects.create(user=request.user, post = post)
+    return redirect('posts:post_detail', post_id=post_id)
+
+@login_required
+def post_unlike(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    user_like_post = Like.objects.filter(user=request.user, post=post)
+    if user_like_post.exists():
+        user_like_post.delete()
+    return redirect('posts:post_detail', post_id=post_id)
