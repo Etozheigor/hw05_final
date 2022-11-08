@@ -32,7 +32,8 @@ class Post(models.Model):
                                         'будет относиться пост')
     image = models.ImageField('Картинка',
                               upload_to='posts/',
-                              blank=True)
+                              blank=True,
+                              null=True,)
 
     class Meta:
         ordering = ('-pub_date',)
